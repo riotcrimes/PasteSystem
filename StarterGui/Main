@@ -1,0 +1,90 @@
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local ConfigModule = replicatedStorage:WaitForChild("Configuration").Paste
+local Config = require(ConfigModule)
+local cooldown = 2
+local Inner = script.Parent.Paste
+
+local Player = game.Players.LocalPlayer
+if Player:GetRankInGroup(Config.GroupId) >= Config.MinRank then
+	script.Parent.Button.Visible = true
+else
+	script.Parent:Destroy()
+end
+
+Inner.Exit.BackgroundColor3 = Config.EmbedColor
+Inner.Holder.TemplateHolder.Template.Button.BackgroundColor3 = Config.EmbedColor
+Inner.BackgroundColor3 = Config.SecondaryColor
+Inner.Holder.TemplateHolder.Template.BackgroundColor3 = Config.SecondaryColor
+																																																																																																																																																	
+	--// Services
+local playerService = game:GetService("Players")
+
+--// Variables
+local eventsFolder = replicatedStorage:WaitForChild("Events")
+local pasteEvent = eventsFolder:FindFirstChild("PasteEvent")
+
+local Base = script.Parent
+local Button = Base:WaitForChild("Button")
+local pasteFrame = Base:WaitForChild("Paste")
+
+local Holder = pasteFrame.Holder
+local ScrollingFrame = Holder.ScrollingFrame
+local Template = Holder.TemplateHolder.Template
+
+local InPosition = UDim2.fromScale(.5, .5)
+local OutPosition = UDim2.fromScale(.5, 1.5)
+
+local Debounce = false
+local framesCreated = false
+local canClick = true
+
+
+--// Main Code 
+
+local function createFrame()
+if not framesCreated then
+for _, messageData in ipairs(Config.Messages) do
+local messageName = messageData[1]
+local messageText = messageData[2]
+
+local messageFrame = Template:Clone()
+messageFrame.Visible = true
+messageFrame.Name = messageName
+
+messageFrame.Title.Text = messageName
+messageFrame.Message.Text = string.format(messageText, playerService.LocalPlayer.Name)
+messageFrame.Parent = ScrollingFrame
+
+local textButton = messageFrame:FindFirstChild("Button")
+if textButton then
+textButton.MouseButton1Up:Connect(function()
+if pasteEvent then
+if canClick then
+canClick = false
+if pasteEvent then
+pasteEvent:FireServer(messageText)
+end
+wait(cooldown)
+canClick = true
+end
+end
+end)
+end
+end
+framesCreated = true
+end
+end
+
+createFrame()
+
+Button.MouseButton1Up:Connect(function()
+if Debounce == false then
+Debounce = true
+pasteFrame:TweenPosition(InPosition, "In", "Linear", 0.6, true)
+return
+end
+Debounce = false
+end)
+pasteFrame.Exit.MouseButton1Up:Connect(function()
+pasteFrame:TweenPosition(OutPosition, "In", "Back", 0.6, true)
+end)
