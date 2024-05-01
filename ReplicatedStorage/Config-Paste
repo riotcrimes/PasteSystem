@@ -1,0 +1,11 @@
+
+--// Variables
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local remoteEvent = replicatedStorage:WaitForChild("Events").PasteEvent
+
+--// Main Code
+
+remoteEvent.OnServerEvent:Connect(function(player, message)
+	local messageText = string.format(message, player.Name)
+	game:GetService("Chat"):Chat(player.Character.Head, messageText, Enum.ChatColor.White)
+end)
