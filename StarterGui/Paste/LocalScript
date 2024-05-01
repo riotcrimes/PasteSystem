@@ -1,0 +1,48 @@
+local Players = game:GetService('Players')
+local UIS = game:GetService("UserInputService")
+local UI = script.Parent
+local Player = Players.LocalPlayer
+local Mouse = Player:GetMouse()
+local Hovered = false
+local Holding = false
+local MoveCon = nil
+local InitialX, InitialY, UIInitialPos
+local Config = require(game.ReplicatedStorage.Configuration.Paste)
+local Template = script.Parent.Holder.TemplateHolder.Template
+
+local function Drag()
+	if Holding == false then MoveCon:Disconnect(); return end
+	local distanceMovedX = InitialX - Mouse.X
+	local distanceMovedY = InitialY - Mouse.Y
+
+	UI.Position = UIInitialPos - UDim2.new(0, distanceMovedX, 0, distanceMovedY)
+end
+
+script.Parent.Title.TextColor3 = Config.TextColor
+script.Parent.Instructions.TextColor3 = Config.TextColor
+
+UI.MouseEnter:Connect(function()
+	Hovered = true
+end)
+
+UI.MouseLeave:Connect(function()
+	Hovered = false
+end)
+
+UIS.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		Holding = Hovered
+		if Holding then
+			InitialX, InitialY = Mouse.X, Mouse.Y
+			UIInitialPos = UI.Position
+
+			MoveCon = Mouse.Move:Connect(Drag)
+		end
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		Holding = false
+	end
+end)
